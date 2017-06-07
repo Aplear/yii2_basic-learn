@@ -28,16 +28,19 @@ AppAsset::register($this);
 <div class="wrap">
     <?php
     NavBar::begin([
-        'brandLabel' => 'Package Manager',
+        'brandLabel' => 'CRUD RBAC USER NEWS',
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
             'class' => 'navbar-inverse navbar-fixed-top',
         ],
     ]);
-    $menuItems = [
-        ['label' => 'Users', 'url' => ['/user/index']],
-        ['label' => 'News', 'url' => ['/news/index']],
-    ];
+    if (Yii::$app->user->can('userModuleCrud')) {
+        $menuItems[] = ['label' => 'Users', 'url' => ['/user/index']];
+    }
+    if (Yii::$app->user->can('deleteOwnNews')) {
+        $menuItems[] = ['label' => 'News', 'url' => ['/news/index']];
+    }
+
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];

@@ -15,6 +15,10 @@ $config = [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+            'defaultRoles' => ['admin', 'manager', 'user'],
+        ],
         'user' => [
             'identityClass' => 'app\common\models\User',
             'enableAutoLogin' => true,

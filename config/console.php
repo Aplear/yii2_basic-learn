@@ -9,6 +9,10 @@ $config = [
     'bootstrap' => ['log'],
     'controllerNamespace' => 'app\commands',
     'components' => [
+        'authManager' => [
+            'class' => 'yii\rbac\PhpManager',
+            'defaultRoles' => ['admin', 'manager', 'user'],
+        ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],

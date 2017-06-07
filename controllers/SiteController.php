@@ -1,8 +1,10 @@
 <?php
 namespace app\controllers;
 
+use app\models\News;
 use Yii;
 use yii\base\InvalidParamException;
+use yii\data\ActiveDataProvider;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
 use yii\filters\VerbFilter;
@@ -11,7 +13,6 @@ use app\models\LoginForm;
 use app\models\PasswordResetRequestForm;
 use app\models\ResetPasswordForm;
 use app\models\SignupForm;
-
 use app\common\models\User;
 use yii\helpers\Html;
 use yii\helpers\Url;
@@ -68,11 +69,7 @@ class SiteController extends Controller
         return [
             'error' => [
                 'class' => 'yii\web\ErrorAction',
-            ],
-            'captcha' => [
-                'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
-            ],
+            ]
         ];
     }
 
@@ -83,7 +80,17 @@ class SiteController extends Controller
      */
     public function actionIndex()
     {
-        return $this->render('index');
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => News::find()->where(['status'=>1])->orderBy(['created_at' => SORT_DESC]),
+            'pagination' => [
+                'pageSize' => News::getPerPage(),
+            ],
+        ]);
+
+        return $this->render('index',[
+            'dataProvider' => $dataProvider,
+        ]);
     }
 
     /**
@@ -156,7 +163,18 @@ class SiteController extends Controller
         return $this->render('signup', ['model' => $model]);
     }
 
-    public function actionActivateAccount($key,$set_password=false)
+
+    /**
+     *
+     * Activate account status
+     * Set password
+     *
+     * @param $key
+     * @param bool $set_password
+     * @return string|\yii\web\Response
+     * @throws BadRequestHttpException
+     */
+    public function actionActivateAccount($key, $set_password=false)
     {
 
         try {

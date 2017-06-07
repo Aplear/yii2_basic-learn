@@ -73,9 +73,16 @@ class SignupForm extends Model
         return $user->save(false) ? $user : null;
     }
 
+    /**
+     * Send email with activation link
+     * @param $user Object
+     * @param $set_password boolean
+     *
+     * @return boolean
+     */
     public function sendActivationEmail($user, $set_password=false)
     {
-        return Yii::$app->mailer->compose(['text' => 'activationEmail'], ['user' => $user, 'set_password' => $set_password])
+        return Yii::$app->mailer->compose(['html' => 'activationEmail-html', 'text' => 'activationEmail-text'], ['user' => $user, 'set_password' => $set_password])
             ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name.' (robot sent).'])
             ->setTo($this->email)
             ->setSubject('Activation for '.Yii::$app->name)

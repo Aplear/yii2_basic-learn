@@ -5,12 +5,13 @@ namespace app\models;
 use yii\base\InvalidParamException;
 use yii\base\Model;
 use app\common\models\User;
-use Yii;
-/* @property string $username */
+
+
 class AccountActivation extends Model
 {
     /* @var $user \app\models\User */
     private $_user;
+    /* @var $password \app\models\User */
     public $password;
 
     /**
@@ -24,6 +25,11 @@ class AccountActivation extends Model
         ];
     }
 
+    /**
+     * AccountActivation constructor.
+     * @param array $key
+     * @param array $config
+     */
     public function __construct($key, $config = [])
     {
         if(empty($key) || !is_string($key))
@@ -33,6 +39,11 @@ class AccountActivation extends Model
             throw new InvalidParamException('Invalid key!');
         parent::__construct($config);
     }
+
+    /**
+     * Save user with activate status
+     * @return bool
+     */
     public function activateAccount()
     {
         $user = $this->_user;
@@ -40,12 +51,19 @@ class AccountActivation extends Model
         $user->removeSecretKey();
         return $user->save();
     }
+
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         $user = $this->_user;
         return $user->username;
     }
 
+    /**
+     * @return bool|null
+     */
     public function setNewPassword()
     {
         if (!$this->validate()) {

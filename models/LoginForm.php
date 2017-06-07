@@ -10,10 +10,25 @@ use app\common\models\User;
  */
 class LoginForm extends Model
 {
+
+    /**
+     * @var $username
+     */
     public $username;
+
+    /**
+     * @var $password
+     */
     public $password;
+
+    /**
+     * @var $rememberMe
+     */
     public $rememberMe = true;
 
+    /**
+     * @var $_user
+     */
     private $_user;
 
 
