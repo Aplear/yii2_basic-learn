@@ -70,7 +70,15 @@ class SignupForm extends Model
             $user->generateSecretKey();
         }
 
-        return $user->save(false) ? $user : null;
+        if($user->save(false)) {
+
+            $profile = new Profile();
+            $profile->user_id = $user->id;
+            $profile->save();
+
+            return $user;
+        }
+        return null;
     }
 
     /**

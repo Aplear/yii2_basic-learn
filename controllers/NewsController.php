@@ -3,6 +3,12 @@
 namespace app\controllers;
 
 use Yii;
+
+use app\helper\notification\SendNotification;
+use app\helper\notification\EmailNotification;
+use app\helper\notification\BrowserNotification;
+use app\models\UserNotifyGraber;
+
 use app\models\News;
 use app\models\NewsSearch;
 use yii\web\Controller;
@@ -33,6 +39,11 @@ class NewsController extends Controller
         ];
     }
 
+    /**
+     * @param \yii\base\Action $action
+     * @return bool
+     * @throws ForbiddenHttpException
+     */
     public function beforeAction($action)
     {
         if (parent::beforeAction($action)) {
@@ -92,24 +103,31 @@ class NewsController extends Controller
     public function actionCreate()
     {
         $model = new News();
-
-        if ($model->load(Yii::$app->request->post())) {
-            $model->user_id = \Yii::$app->user->id;
-            if($model->upload() && $model->save()) {
-                return $this->redirect(['index', 'id' => $model]);
-            } else {
-                Yii::$app->response->format = Response::FORMAT_JSON;
+        //ajax came
+        if(Yii::$app->request->isAjax) {
+            //prepare response formate
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            //check if post
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
                 return ActiveForm::validate($model);
             }
-        }
-
-        if(Yii::$app->request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
             return [
                 $this->renderAjax('create', [ 'model'=>$model])
             ];
+
         } else {
-            $this->render('create', ['model'=>$model]);
+            //check if post
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
+                $model->user_id = \Yii::$app->user->id;
+                //upload image ad save news
+                if($model->upload() && $model->save()) {
+                    //send notification start
+                    $this->sendNotification(Yii::$app->urlManager->createAbsoluteUrl(['news/details', 'id'=>$model->id]));
+                    return $this->redirect(['index', 'id' => $model]);
+                }
+
+                throw new \Exception("System error, please contact to admin");
+            }
         }
     }
 
@@ -122,33 +140,54 @@ class NewsController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post())) {
-            if($model->upload() && $model->validate() && $model->save()) {
-                return $this->redirect(['index', 'id' => $model]);
-            } else {
-                Yii::$app->response->format = Response::FORMAT_JSON;
+        //ajax came
+        if(Yii::$app->request->isAjax) {
+            //prepare response formate
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            //check if post
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
                 return ActiveForm::validate($model);
             }
-        }
-
-
-        if(Yii::$app->request->isAjax) {
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return [
                 $this->renderAjax('update', [ 'model'=>$model])
             ];
         } else {
-            $this->render('update',['model'=>$model]);
+            //check if post
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
+                if ($model->upload() && $model->validate()) {
+                    $model->save();
+                    return $this->redirect(['index', 'id' => $model]);
+                }
+
+                throw new \Exception("System error, please contact to admin");
+            }
         }
+    }
+
+    /**
+     * @param $link
+     */
+    public function sendNotification($link)
+    {
+        //prepare data for sending
+        $result = UserNotifyGraber::prepareData($link);
+        //set notifications objects
+        $notifications =  [
+            new EmailNotification($result['email']),
+            new BrowserNotification($result['browser']),
+        ];
+
+        $sendNotification = new SendNotification($notifications);
+        $sendNotification->sendNotification();
     }
 
     public function actionChangeStatus($id, $status)
     {
+        //ajax came
         if(Yii::$app->request->isAjax) {
-
+            //check in come data
             if(is_numeric($id) && is_numeric($status)) {
-
+                //find data for update
                 $model = News::findOne([
                     'id'=>$id,
                     'user_id' => Yii::$app->user->id
@@ -159,15 +198,15 @@ class NewsController extends Controller
                 } else {
                     return false;
                 }
+                //prepare response formate
                 \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
                 return [
                     'status' => $model->status
                 ];
-            } else {
-
             }
-
+            throw new \Exception("Data is not valide!");
         }
+        throw new \Exception("System error, please contact to admin");
     }
     /**
      * Deletes an existing News model.

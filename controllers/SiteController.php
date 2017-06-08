@@ -82,7 +82,7 @@ class SiteController extends Controller
     {
 
         $dataProvider = new ActiveDataProvider([
-            'query' => News::find()->where(['status'=>1])->orderBy(['created_at' => SORT_DESC]),
+            'query' => News::find()->where(['status'=>2])->orderBy(['created_at' => SORT_DESC]),
             'pagination' => [
                 'pageSize' => News::getPerPage(),
             ],
@@ -134,7 +134,6 @@ class SiteController extends Controller
      */
     public function actionSignup()
     {
-        $model = new SignupForm();
         $emailActivation = Yii::$app->params['emailActivation'];
         $model = $emailActivation ? new SignupForm(['scenario' => 'emailActivation']) : new SignupForm();
 

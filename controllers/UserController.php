@@ -81,33 +81,38 @@ class UserController extends Controller
         $emailActivation = Yii::$app->params['emailActivation'];
         $model = $emailActivation ? new User(['scenario' => 'emailActivation']) : new User();
 
-        if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
-            if($model->validate()) {
-                if($user = $model->createUser()) {
-                    if (!$model->sendActivationEmail($user, true)) {
-                        Yii::$app->session->setFlash('error', 'Exception. did not send.');
-                        Yii::error('Error send mail.');
-                    }
-                    return $this->redirect('index');
-                } else {
-                    Yii::$app->session->setFlash('error', 'There was an error registering.');
-                    Yii::error('Registration error.');
-                    return $this->refresh();
-                }
-
-            } else {
-                Yii::$app->response->format = Response::FORMAT_JSON;
+        //ajax came
+        if(Yii::$app->request->isAjax) {
+            //prepare response formate
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
                 return ActiveForm::validate($model);
             }
-        }
-
-        if(Yii::$app->request->isAjax) {
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return [
                 $this->renderAjax('create', [ 'model'=>$model])
             ];
         } else {
-            $this->render('create', ['model'=>$model]);
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
+                if($model->validate()) {
+                    //save user if valide
+                    if($user = $model->createUser()) {
+                        //check sending activation email
+                        if (!$model->sendActivationEmail($user, true)) {
+                            Yii::$app->session->setFlash('error', 'Exception. did not send.');
+                            Yii::error('Error send mail.');
+                        }
+                        return $this->redirect(Yii::$app->urlManager->createAbsoluteUrl("user/index"));
+                    } else {
+                        Yii::$app->session->setFlash('error', 'There was an error registering.');
+                        Yii::error('Registration error.');
+                        return $this->refresh();
+                    }
+
+                }
+
+                throw new \Exception("System error, please contact to admin");
+            }
+
         }
     }
 
@@ -121,22 +126,25 @@ class UserController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post())) {
-            if($model->validate() && $model->save()) {
-                return $this->redirect(['index', 'id' => $model]);
-            } else {
-                Yii::$app->response->format = Response::FORMAT_JSON;
+        //ajax came
+        if(Yii::$app->request->isAjax) {
+            //prepare response formate
+            Yii::$app->response->format = Response::FORMAT_JSON;
+            //check if post
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
                 return ActiveForm::validate($model);
             }
-        }
-
-        if(Yii::$app->request->isAjax) {
-            \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
             return [
                 $this->renderAjax('update', [ 'model'=>$model])
             ];
         } else {
-            $this->render('update',['model'=>$model]);
+            if (Yii::$app->request->post() && $model->load(Yii::$app->request->post())) {
+                if($model->validate() && $model->save()) {
+                    return $this->redirect(['index', 'id' => $model]);
+                }
+                throw new \Exception("System error, please contact to admin");
+            }
+
         }
     }
 

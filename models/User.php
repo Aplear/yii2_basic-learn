@@ -49,18 +49,14 @@ class User extends ActiveRecord
         return [
             ['username', 'trim'],
             ['username', 'required'],
-            ['username', 'unique', 'targetClass' => '\app\common\models\User', 'message' => 'This username has already been taken.', 'when' => function(){
-                return (Yii::$app->user->identity->username != $this->username);
-            }],
+            ['username', 'unique', 'targetClass' => '\app\common\models\User', 'message' => 'This username has already been taken.', 'on' => 'create'],
             ['username', 'string', 'min' => 2, 'max' => 255],
 
             ['email', 'trim'],
             ['email', 'required'],
             ['email', 'email'],
             ['email', 'string', 'max' => 255],
-            ['email', 'unique', 'targetClass' => 'app\common\models\User', 'message' => 'This email address has already been taken.', 'when' => function(){
-                return (Yii::$app->user->identity->email != $this->email);
-            }],
+            ['email', 'unique', 'targetClass' => 'app\common\models\User', 'message' => 'This email address has already been taken.', 'on' => 'create'],
 
             ['group', 'string'],
 
@@ -115,7 +111,16 @@ class User extends ActiveRecord
             $user->generateSecretKey();
         }
 
-        return $user->save(false) ? $user : null;
+        if($user->save(false)) {
+
+            $profile = new Profile();
+            $profile->user_id = $user->id;
+            $profile->save();
+
+            return $user;
+        }
+        return null;
+
     }
     
     /**
@@ -132,5 +137,13 @@ class User extends ActiveRecord
             ->setTo($this->email)
             ->setSubject('Activation for '.Yii::$app->name)
             ->send();
+    }
+
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getProfile()
+    {
+        return $this->hasOne(Profile::className(), ['user_id' => 'id']);
     }
 }

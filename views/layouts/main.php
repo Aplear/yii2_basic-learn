@@ -45,6 +45,7 @@ AppAsset::register($this);
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
     } else {
+        $menuItems[] = ['label' => 'Profile', 'url' => ['/profile/update', 'id' => Yii::$app->user->id]];
         $menuItems[] = '<li>'.
                 Html::beginForm(['/site/logout'], 'post')
                 . Html::submitButton(
@@ -70,7 +71,7 @@ AppAsset::register($this);
         <?= $content ?>
     </div>
 </div>
-
+<div class="absolute-alert-block"></div>
 <footer class="footer">
     <div class="container">
         <p class="pull-left">&copy; Basic Test <?= date('Y') ?></p>

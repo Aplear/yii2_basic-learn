@@ -7,9 +7,7 @@ $activateLink = Yii::$app->urlManager->createAbsoluteUrl([
     '/site/activate-account',
     'key' => $user->secret_key,
     'set_password' => $set_password
-],
-    ['target' => '_blank']
-)
+])
 ?>
 Hello <?= $user->username ?>,
 

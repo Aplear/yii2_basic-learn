@@ -16,7 +16,7 @@ class m170606_204113_create_profile_table extends Migration
             'id' => $this->primaryKey(),
             'user_id' => $this->integer(10)->notNull(),
             'rss_email' => $this->integer(2)->defaultValue(0),
-            'rss_brpwser' => $this->integer(2)->defaultValue(0),
+            'rss_browser' => $this->integer(2)->defaultValue(0),
         ]);
         // creates index for column `user_id`
         $this->createIndex(

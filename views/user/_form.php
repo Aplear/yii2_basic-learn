@@ -11,13 +11,10 @@ use yii\widgets\ActiveForm;
 <div class="user-form">
 
     <?php $form = ActiveForm::begin(
-        ['options' =>
-            [
-                'enctype' => 'multipart/form-data',
-                'id' => 'user-form',
-                'enableAjaxValidation' => true,
-                'enableClientValidation' => true,
-            ]
+        [
+            'id' => 'user-form',
+            'enableAjaxValidation' => true,
+            'enableClientValidation' => true,
         ]
     ); ?>
 

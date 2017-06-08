@@ -24,6 +24,7 @@ class AppAsset extends AssetBundle
         'position' => \yii\web\View::POS_HEAD
     );
     public $js = [
+        'js/notification_check.js'
     ];
     public $depends = [
 
